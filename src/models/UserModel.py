@@ -15,3 +15,7 @@ class UserModelPost(BaseModel):
     password: Annotated[str, "string password of user"]
     display_name: str | None = Field(
         default=None, title="display name of user on UI/UX", max_length=12)
+
+class UserResponse(BaseModel):
+    data: UserModelPost
+    msg: str
