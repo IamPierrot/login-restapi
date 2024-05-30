@@ -17,5 +17,5 @@ class UserModelPost(BaseModel):
         default=None, title="display name of user on UI/UX", max_length=12)
 
 class UserResponse(BaseModel):
-    data: UserModelPost
+    data: dict
     msg: str

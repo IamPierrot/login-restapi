@@ -1,3 +1,6 @@
+import json
+
+from src.routers import SECRET_KEY
 from ..models.UserModel import UserModelDatabase, UserModelPost, UserResponse
 from src.utils.dependencies import oauth2_scheme
 from src.security.Hash import Hashing
@@ -7,9 +10,8 @@ from datetime import datetime, timedelta, timezone
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated, Collection
+from typing import Annotated
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -20,6 +22,15 @@ router = APIRouter(
 
 
 user_collection = LoginDatabase['account']
+
+
+def get_list_users() -> list[UserModelDatabase]:
+    documents = list(user_collection.find())
+    for doc in documents:
+        doc["_id"] = str(doc["_id"])
+        # doc = UserModelDatabase(**doc)
+    return documents
+
 
 def get_user(username: str):
     result = user_collection.find_one({"username": username})
@@ -72,7 +83,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         )
 
 
-@router.post('/register', response_model=UserResponse)
+@router.post('/register')
 def create_new_user(user_input: UserModelPost):
     try:
         user_collection.insert_one({
@@ -84,7 +95,7 @@ def create_new_user(user_input: UserModelPost):
         print(e)
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return JSONResponse({"data": user_input, "msg": "Create new account successfully!"})
+    return JSONResponse({"data": user_input.model_dump(), "msg": "Create new account successfully!"})
 
 
 @router.post('/login')
@@ -107,10 +118,10 @@ async def authorization_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get('/user/me/')
-async def modify_user_information(current_user: UserModelDatabase = Depends(get_current_user)):
-    return JSONResponse({"data": current_user.model_dump_json()})
+async def get_user_information(current_user: UserModelDatabase = Depends(get_current_user)):
+    return JSONResponse({"data": json.loads(current_user.model_dump_json())})
 
 
-# @router.get('/users')
-# async def get_all_users():
-#     return get_list_users()
+@router.get('/users')
+async def get_all_users():
+    return get_list_users()

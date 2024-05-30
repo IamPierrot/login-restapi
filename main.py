@@ -3,11 +3,13 @@ from pkgutil import iter_modules
 import signal
 import time
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from src.database import client
-app = FastAPI()
 
-for _, name, ispkg in iter_modules(path=['src/routers'], prefix='src.routers.'):
-    if not ispkg and not name.startswith('_'):
+app = FastAPI(default_response_class=JSONResponse)
+
+for _, name, ispackage in iter_modules(path=['src/routers'], prefix='src.routers.'):
+    if not ispackage and not name.startswith('_'):
         module = import_module(name)
         app.include_router(module.router)
 

@@ -1,5 +1,7 @@
+from fastapi.logger import logger
 from pymongo import MongoClient
 from dotenv import dotenv_values, load_dotenv
+
 
 load_dotenv()
 class MyDatabase:
@@ -23,4 +25,4 @@ class MyDatabase:
         except Exception as e:
             raise Exception("Can not connect to database! Try again...", e)
         finally:
-            print('✅ Successfully connect to database!')
+            logger.info(msg='Connect to database!')
