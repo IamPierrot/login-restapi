@@ -6,7 +6,10 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from src.database import client
 
-app = FastAPI(default_response_class=JSONResponse)
+app = FastAPI(
+    default_response_class=JSONResponse,
+    title="AuthMeAPI"
+)
 
 for _, name, ispackage in iter_modules(path=['src/routers'], prefix='src.routers.'):
     if not ispackage and not name.startswith('_'):
